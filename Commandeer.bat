@@ -23,7 +23,7 @@ echo [Y] - Yes
 echo [N] - No
 choice /N /C:YN %1
 if %errorlevel%==1 rem
-if %errorlevel%==2 goto startupcheck
+if %errorlevel%==2 goto commandeer
 set /p "password=Set your password | "
 cd commandeerData
 echo %password%>pass
