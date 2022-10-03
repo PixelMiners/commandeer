@@ -1,11 +1,79 @@
 @echo off
-title Commandeer™
 
-echo Commandeer [Version 1.0]
-echo (c) 2022 Partiglow. All rights haven't been reserved yet.
+
+
+
+
+set commandeerlocation=%cd%
+set currentdrive=%CD:~0,3%
+if exist setupdel_DO-NOT-DELETE goto commandeer
+title Commandeer - First Time Setup
+echo Welcome to Commandeer!
+pause
+cls
+echo Generating folders..
+mkdir "Logs"
+mkdir "commandeerData"
+timeout 1 >nul
+echo. > setupdel_DO-NOT-DELETE
+attrib +h setupdel_DO-NOT-DELETE
+cls
+echo Would you like to set a password?
+echo [Y] - Yes
+echo [N] - No
+choice /N /C:YN %1
+if %errorlevel%==1 rem
+if %errorlevel%==2 goto startupcheck
+set /p "password=Set your password | "
+cd commandeerData
+echo %password%>pass
+cd ..
+goto commandeer
+
+
+
+:wrongpass
+cd Logs
+echo User input incorrect password >>logs.txt
+cd ..
+echo Incorrect password.
+pause
+goto running
+
+:running
+cd commandeerData
+set /p pass=<pass
+cd ..
+cls
+echo Enter your password:
+set /p "enterpass=Enter | "
+IF %enterpass%==%pass% (
+	goto start
+) ELSE (
+	goto wrongpass
+)
+:commandeer
+cd Logs
+for /f "tokens=1-2 delims=:" %%a in ('ipconfig^|find "IPv4"') do set ip=%%b
+set ip=%ip:~1%
+echo User (%ip%) launched Commandeer >>logs.txt
+cd ..
+cd commandeerData
+if exist pass goto running
+if not exist pass goto start
+cd ..
+
+:start
+cls
+cd %currentdrive%
+title Commandeer
+echo Commandeer - 1.0 ^| 2022 Partiglow. All rights haven't been reserved yet.
+echo 
 echo.
+
+
 :command
-set /p command=%cd% : 
+set /p "command=%cd% | "
 :: area for custom commands
 :: when the user types "amongus" it will respond with "frick you"
 IF "%command%" == "amongus" (
@@ -16,6 +84,8 @@ IF "%command%" == "amongus" (
 	goto about
 ) ELSE IF "%command%" == "clearlogs" (
 	goto clearlogs
+) ELSE IF "%command%" == "echo on" (
+	goto echoon
 ) ELSE (
 	goto parsecommand
 )
@@ -23,11 +93,15 @@ IF "%command%" == "amongus" (
 
 :: end of area for custom commands
 :parsecommand
-%command%
+set previouscd=%cd%
+cd %commandeerlocation%
 cd Logs
 echo %cd% : %command%>> logs.txt
-%command% >> logs.txt
+%command%
+if %ERRORLEVEL%==9009 echo Unknown Command
 cd ..
+set "command= "
+cd %previouscd%
 goto command
 
 :amongus
@@ -44,13 +118,22 @@ pause
 goto command
 
 :about
-echo bootleg command prompt lmao
+echo Commandeer is just Command Prompt but with a bit more features.
 pause
 goto command
 
 :clearlogs
-echo fine you baka
+echo Cleared logs.
 cd Logs
 echo.> logs.txt
 cd ..
+goto command
+
+:echoon
+echo Are you sure? This will show every command that is running when you do anything.
+echo [Y] - I know what I'm doing!
+echo [N] - Nah
+choice /N /C:YN %1
+if %errorlevel%==1 @echo on
+if %errorlevel%==2 rem
 goto command
