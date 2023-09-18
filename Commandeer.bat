@@ -24,7 +24,8 @@ echo [N] - No
 choice /N /C:YN %1
 if %errorlevel%==1 rem
 if %errorlevel%==2 goto commandeer
-set /p "password=Set your password | "
+powershell -Command "& {Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.Interaction]::InputBox('Set your password::', 'Commandeer - Popup')}" > %TEMP%\out.tmp
+set /p password=<%TEMP%\out.tmp
 cd commandeerData
 echo %password%>pass
 cd ..
@@ -97,10 +98,13 @@ set previouscd=%cd%
 cd %commandeerlocation%
 cd Logs
 echo %cd% : %command%>> logs.txt
-%command%
-if %ERRORLEVEL%==9009 echo Unknown Command
+IF "%command%" == "" (
+	set command=blank
+)
+%command% 2>nul
+if %ERRORLEVEL%==9009 echo "%command%" wasn't recognized.
 cd ..
-set "command= "
+set "command=blank"
 cd %previouscd%
 goto command
 
